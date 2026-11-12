@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diamond Clicker — Панель администратора</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:#0d0f1c;color:#e8eaff;min-height:100vh}
+button,input,select,textarea{font-family:inherit}
+.hide{display:none!important}
+#login{max-width:340px;margin:12vh auto;padding:26px;background:#161a30;border:1px solid #2b3260;border-radius:18px;text-align:center}
+#login h1{margin:0 0 4px;font-size:22px}#login p{margin:0 0 16px;color:#8c93c8;font-size:13px}
+.inp{width:100%;padding:11px 12px;margin-bottom:10px;border-radius:10px;border:1px solid #2b3260;background:#0d1024;color:#fff;font-size:15px}
+.btn{padding:10px 14px;border:none;border-radius:10px;background:#3a4380;color:#fff;font-weight:700;cursor:pointer;font-size:14px}
+.btn:hover{filter:brightness(1.15)}.btn.pri{background:linear-gradient(135deg,#5b6cff,#8a4bff)}.btn.ok{background:#1f9d62}.btn.warn{background:#c9822b}.btn.bad{background:#b83a4a}
+.btn.full{width:100%}.err{color:#ff7a8a;font-size:13px;min-height:18px;margin-top:6px}
+header{display:flex;align-items:center;gap:10px;padding:12px 18px;background:#12152a;border-bottom:1px solid #2b3260;position:sticky;top:0;z-index:10}
+header h1{font-size:17px;margin:0;flex:1}header span{color:#8c93c8;font-size:13px}
+.wrap{display:grid;grid-template-columns:280px 1fr;gap:16px;padding:16px;max-width:1280px;margin:0 auto}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+.card{background:#161a30;border:1px solid #2b3260;border-radius:14px;padding:14px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:14px;color:#aab2ff;text-transform:uppercase;letter-spacing:1px}
+.th{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;border:1px solid transparent}
+.th:hover{background:#1d2242}.th.sel{background:#232a55;border-color:#5b6cff}
+.th .e{font-size:22px}.th .n{flex:1;font-weight:700;font-size:14px}.th .b{font-size:10px;padding:2px 6px;border-radius:6px;background:#2b3260;color:#cfd4ff;margin-left:3px}
+.th .b.g{background:#7a5a10;color:#ffe08a}.th .b.o{background:#5a2030;color:#ffb0bc}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}.row>label{flex:1;min-width:120px;font-size:12px;color:#8c93c8}
+.row>label .inp{margin:4px 0 0}
+.colors{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.col{display:flex;align-items:center;gap:8px;background:#0d1024;border:1px solid #2b3260;border-radius:10px;padding:6px 8px;font-size:12px}
+.col input[type=color]{width:36px;height:30px;padding:0;border:none;background:none;cursor:pointer}.col span{flex:1}
+.edit{display:grid;grid-template-columns:1fr 320px;gap:16px}@media(max-width:1100px){.edit{grid-template-columns:1fr}}
+textarea.inp{min-height:120px;font-family:Consolas,monospace;font-size:12px}
+.hint{font-size:12px;color:#8c93c8;margin:0 0 8px;line-height:1.45}
+.sticky{position:sticky;top:70px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#232a55;border:1px solid #5b6cff;padding:10px 18px;border-radius:12px;font-weight:700;z-index:99;opacity:0;transition:.25s;pointer-events:none}
+#toast.show{opacity:1}#toast.bad{border-color:#ff5a6e;background:#4a1a24}
+/* ---- мини-макет игры для предпросмотра ---- */
+#pv{--bg:#060b14;--green:#00e676;--green-d:#00b85c;--green-shadow:#005520;--blue:#00c8ff;--blue-d:#0099cc;--blue-shadow:#004466;--orange:#ffaa00;--orange-d:#cc8800;--orange-shadow:#664400;--purple:#c77dff;--border:rgba(255,255,255,.1);--card:rgba(255,255,255,.06);--surface:rgba(10,20,40,.95);--text2:rgba(255,255,255,.55);
+ position:relative;width:300px;height:560px;margin:0 auto;border-radius:26px;overflow:hidden;background:var(--bg);color:#fff;display:flex;flex-direction:column;border:3px solid #2b3260;font-family:'Nunito','Segoe UI',sans-serif}
+#pv #bg-anim{position:absolute;inset:0;z-index:0}
+#pv>*:not(#bg-anim){position:relative;z-index:1}
+#pv .topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(10,20,40,.9);border-bottom:3px solid var(--blue);font-weight:800;font-size:13px}
+#pv .pill{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px 9px}
+#pv .mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:10px}
+#pv .big{font-size:76px;filter:drop-shadow(0 0 20px var(--blue))}
+#pv .cardx{width:88%;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px;font-size:12px;color:var(--text2);text-align:center}
+#pv .cardx b{color:#fff}
+#pv .modal{width:100%;background:var(--surface);border-top:4px solid var(--blue);padding:12px;border-radius:16px 16px 0 0;display:flex;flex-direction:column;gap:8px;font-size:12px}
+#pv .rowb{display:flex;gap:6px}
+#pv .nav-btn,#pv .duo-btn{flex:1;border:2px solid rgba(255,255,255,.18);border-radius:12px;padding:9px 4px;color:#fff;font-weight:900;font-size:11px;text-align:center;background:linear-gradient(160deg,var(--blue),var(--blue-d));box-shadow:0 4px 0 var(--blue-shadow)}
+#pv .bottom-nav{display:flex;gap:6px;padding:8px;background:rgba(10,20,40,.95);border-top:4px solid var(--blue)}
+#pv input{width:100%;padding:7px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:#fff}
+</style></head><body>
+<div id="login">
+  <h1>🔐 Панель администратора</h1><p>Diamond Clicker — темы и оформление</p>
+  <input id="lg" class="inp" placeholder="Логин" autocomplete="username">
+  <input id="pw" class="inp" type="password" placeholder="Пароль" autocomplete="current-password">
+  <button class="btn pri full" onclick="doLogin()">Войти</button>
+  <div class="err" id="lerr"></div>
+</div>
+<div id="app" class="hide">
+  <header><h1>🎨 Темы Diamond Clicker</h1><span id="who"></span><button class="btn" onclick="doLogout()">Выйти</button></header>
+  <div class="wrap">
+    <div>
+      <div class="card"><h2>Темы</h2><div id="list"></div>
+        <button class="btn pri full" style="margin-top:10px" onclick="newTheme()">➕ Новая тема</button></div>
+      <div class="card"><h2>Для всех игроков</h2>
+        <p class="hint" id="forcedInfo">Тема для всех не выбрана.</p>
+        <button class="btn warn full" id="btnForce" onclick="forceTheme(true)" disabled>🌟 Применить выбранную для всех</button>
+        <button class="btn full" style="margin-top:8px" onclick="forceTheme(false)">Снять принудительную тему</button></div>
+    </div>
+    <div id="editorWrap" class="hide">
+      <div class="edit">
+        <div>
+          <div class="card"><h2>Основное</h2>
+            <div class="row"><label>Название<input class="inp" id="f_name" maxlength="40"></label><label style="max-width:90px">Эмодзи<input class="inp" id="f_emoji" maxlength="4"></label></div>
+            <div class="row"><label>Цена в ⚡ (0 — бесплатно)<input class="inp" id="f_price" type="number" min="0"></label><label>Порядок в списке<input class="inp" id="f_order" type="number"></label></div>
+            <div class="row"><label>Узор фона<select class="inp" id="f_pattern"><option value="dots">Точки</option><option value="grid">Сетка</option><option value="stripes">Полосы</option><option value="none">Без узора</option></select></label>
+              <label>Шрифт<select class="inp" id="f_font"><option value="default">Как в игре</option><option value="serif">С засечками</option><option value="mono">Моноширинный</option><option value="rounded">Округлый</option></select></label></div>
+            <label style="font-size:13px"><input type="checkbox" id="f_enabled"> Показывать игрокам (включена)</label></div>
+          <div class="card"><h2>Цвета</h2><div class="colors" id="colors"></div>
+            <button class="btn" style="margin-top:10px" onclick="autoShades()">✨ Подобрать тёмные оттенки и тени автоматически</button></div>
+          <div class="card"><h2>Свой CSS (по желанию)</h2>
+            <p class="hint">Добавляется поверх темы. Пишите селекторы с <code>{{t}}</code> в начале — он заменится на тему, например <code>{{t}} .topbar{border-bottom-width:6px}</code>. @import и &lt;style&gt; вырезаются.</p>
+            <textarea class="inp" id="f_css" spellcheck="false"></textarea></div>
+          <div class="card"><div class="row" style="margin:0">
+            <button class="btn ok" onclick="saveTheme()">💾 Сохранить</button>
+            <button class="btn" onclick="dupTheme()">📄 Дублировать</button>
+            <button class="btn bad" onclick="delTheme()">🗑 Удалить</button></div></div>
+        </div>
+        <div><div class="sticky card"><h2>Предпросмотр</h2>
+          <style id="pvStyle"></style>
+          <div id="pv"><div id="bg-anim"></div>
+            <div class="topbar"><span class="pill">💎 1 234</span><span>Diamond Clicker</span><span class="pill">⚡ 56</span></div>
+            <div class="mid"><div class="big">💎</div>
+              <div class="cardx"><b>Карточка</b><br>Так выглядит подпись и фон карточки</div>
+              <div class="rowb" style="width:88%"><div class="duo-btn green">Зелёная</div><div class="duo-btn orange">Доп.</div><div class="duo-btn gray">Серая</div></div></div>
+            <div class="modal"><b>Окно</b><div style="color:var(--text2)">Текст окна и поле ввода</div><input placeholder="Поле ввода"></div>
+            <div class="bottom-nav"><div class="nav-btn blue">Игра</div><div class="nav-btn orange">Бонус</div><div class="nav-btn green">Задачи</div><div class="nav-btn purple">Магазин</div></div>
+          </div></div></div>
+      </div>
+    </div>
+    <div id="emptyHint" class="card"><h2>Редактор</h2><p class="hint">Выберите тему слева или создайте новую.</p></div>
+  </div>
+</div>
+<div id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+var DC_THEME_DEFAULTS={bg:'#0a0a1a',bg2:'#1a0a33',primary:'#00c8ff',primaryD:'#0077aa',primaryS:'#003a55',second:'#9b5de5',secondD:'#5a2a9c',secondS:'#2a0f55',accent:'#00e676',accentD:'#00a852',accentS:'#00502a',surface:'#10122e',text2:'#e0e0ff'};
+var DC_THEME_FONTS={default:'',serif:"Georgia,'Times New Roman',serif",mono:"'Courier New',monospace",rounded:"'Trebuchet MS','Segoe UI',sans-serif"};
+function dcBuildThemeCss(t,sel){
+  sel=sel||'body.dyn-theme';t=t||{};
+  var hex=function(c,d){return /^#[0-9a-fA-F]{6}$/.test(c||'')?c:d;};
+  var C={};for(var k in DC_THEME_DEFAULTS)C[k]=hex((t.colors||{})[k],DC_THEME_DEFAULTS[k]);
+  var a=function(c,al){var n=parseInt(c.slice(1),16);return 'rgba('+(n>>16&255)+','+(n>>8&255)+','+(n&255)+','+al+')';};
+  var s=sel,font=DC_THEME_FONTS[t.font]||'';
+  var pat=t.pattern||'dots',bgi;
+  if(pat==='dots')bgi='background-image:radial-gradient(circle at 20px 20px,'+a(C.primary,.16)+' 8px,transparent 9px),radial-gradient(circle at 60px 60px,'+a(C.second,.14)+' 6px,transparent 7px),linear-gradient(180deg,'+C.bg+','+C.bg2+');background-size:80px 80px,80px 80px,auto;';
+  else if(pat==='grid')bgi='background-image:linear-gradient('+a(C.primary,.12)+' 1px,transparent 1px),linear-gradient(90deg,'+a(C.primary,.12)+' 1px,transparent 1px),linear-gradient(180deg,'+C.bg+','+C.bg2+');background-size:40px 40px,40px 40px,auto;';
+  else if(pat==='stripes')bgi='background-image:repeating-linear-gradient(45deg,'+a(C.primary,.08)+' 0 14px,transparent 14px 28px),linear-gradient(180deg,'+C.bg+','+C.bg2+');background-size:auto;';
+  else bgi='background-image:linear-gradient(180deg,'+C.bg+','+C.bg2+');background-size:auto;';
+  var css=''
+  +s+'{--bg:'+C.bg+';--green:'+C.accent+';--green-d:'+C.accentD+';--green-shadow:'+C.accentS+';--blue:'+C.primary+';--blue-d:'+C.primaryD+';--blue-shadow:'+C.primaryS+';--orange:'+C.second+';--orange-d:'+C.secondD+';--orange-shadow:'+C.secondS+';--purple:'+C.second+';--border:'+a(C.primary,.33)+';--tp:'+C.primary+';--tp-d:'+C.primaryD+';--tp-shadow:'+C.primaryS+';--card:'+a(C.primary,.13)+';--card2:'+a(C.primary,.2)+';--surface:'+a(C.surface,.96)+';--text2:'+a(C.text2,.8)+';background:'+C.bg+';'+(font?'font-family:'+font+' !important;':'')+'}'
+  +s+' #bg-anim{'+bgi+'animation:none;opacity:1;}'
+  +s+' .topbar{background:linear-gradient(180deg,'+a(C.primary,.3)+','+a(C.bg,.94)+');border-bottom:3px solid '+C.primary+';}'
+  +s+' .bottom-nav{background:linear-gradient(0deg,'+a(C.bg,.97)+','+a(C.second,.45)+');border-top:4px solid '+C.primary+';}'
+  +s+' .nav-btn.blue,'+s+' .duo-btn.blue{background:linear-gradient(160deg,'+C.primary+','+C.primaryD+');box-shadow:0 4px 0 '+C.primaryS+',0 6px 18px '+a(C.primary,.33)+';}'
+  +s+' .nav-btn.orange,'+s+' .duo-btn.orange{background:linear-gradient(160deg,'+C.second+','+C.secondD+');box-shadow:0 4px 0 '+C.secondS+',0 6px 18px '+a(C.second,.33)+';}'
+  +s+' .nav-btn.green,'+s+' .duo-btn.green{background:linear-gradient(160deg,'+C.accent+','+C.accentD+');box-shadow:0 4px 0 '+C.accentS+',0 6px 18px '+a(C.accent,.33)+';}'
+  +s+' .nav-btn.purple,'+s+' .nav-btn.shop,'+s+' .duo-btn.purple{background:linear-gradient(160deg,'+C.second+','+C.secondD+');box-shadow:0 4px 0 '+C.secondS+';}'
+  +s+' .duo-btn.gray,'+s+' .nav-btn.settings,'+s+' .nav-btn.notif{background:linear-gradient(160deg,'+a(C.primary,.2)+','+a(C.surface,.96)+');border-color:'+a(C.primary,.33)+';}'
+  +s+' ::-webkit-scrollbar-thumb{background:'+a(C.primary,.55)+';border-radius:10px;}'
+  +s+' .modal,'+s+' .ckw{background-color:'+a(C.surface,.96)+';border-top:4px solid '+C.primary+';}'
+  +s+' input,'+s+' select,'+s+' textarea{background:'+a(C.primary,.1)+';border-color:'+a(C.primary,.33)+';}'
+  +s+' ::selection{background:'+a(C.primary,.4)+';}';
+  var extra=String(t.customCss||'').replace(/@import[^;]*;?/gi,'').replace(/<\/?style[^>]*>/gi,'').replace(/expression\s*\(/gi,'').replace(/javascript:/gi,'').replace(/\{\{t\}\}/g,s).slice(0,8000);
+  return css+extra;
+}
+
+var ADMIN_LOGIN='kepler';
+var auth=null,db=null,TS=function(){return firebase.firestore.FieldValue.serverTimestamp();},INIT_ERR='';
+try{
+  firebase.initializeApp({apiKey:"AIzaSyDfjCmE_t8xz0fTQuQOyMnKtdcNrU3ErVU",authDomain:"diamond-clicker-4edcf.firebaseapp.com",projectId:"diamond-clicker-4edcf",storageBucket:"diamond-clicker-4edcf.firebasestorage.app",messagingSenderId:"28298480948",appId:"1:28298480948:web:cf68a6b1d4ea28d3672961"});
+  auth=firebase.auth();db=firebase.firestore();
+}catch(e){INIT_ERR=(e&&(e.code||e.message))||String(e);}
+if(location.protocol==='file:')INIT_ERR='Страница открыта как файл (file://). Firebase не работает с файлов — выложите admin_panel.html на сайт (рядом с игрой, GitHub Pages и т.п.) и откройте по ссылке https://…';
+var $=function(i){return document.getElementById(i);};
+var themes=[],cur=null,curId=null,forced={themeId:'',enabled:false},unsubs=[];
+var COLOR_LABELS={bg:'Фон',bg2:'Фон (низ градиента)',primary:'Основной',primaryD:'Основной тёмный',primaryS:'Основной — тень',second:'Дополнительный',secondD:'Доп. тёмный',secondS:'Доп. — тень',accent:'Акцент (зелёный)',accentD:'Акцент тёмный',accentS:'Акцент — тень',surface:'Окна и панели',text2:'Второстепенный текст'};
+function toast(m,bad){var t=$('toast');t.textContent=m;t.className='show'+(bad?' bad':'');clearTimeout(toast._t);toast._t=setTimeout(function(){t.className='';},2600);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+var AUTH_MSG={'auth/invalid-credential':'Неверный логин или пароль','auth/wrong-password':'Неверный пароль','auth/user-not-found':'Такого аккаунта нет','auth/invalid-email':'Неверный логин','auth/too-many-requests':'Слишком много попыток — подождите несколько минут','auth/network-request-failed':'Нет связи с интернетом','auth/user-disabled':'Аккаунт отключён','auth/operation-not-supported-in-this-environment':'Страница открыта не по http/https — выложите файл на сайт'};
+function doLogin(){
+  var u=$('lg').value.trim().toLowerCase().replace(/[^a-z0-9_.-]/g,''),p=$('pw').value;
+  $('lerr').textContent='';
+  if(INIT_ERR||!auth){$('lerr').textContent='⚠️ '+(INIT_ERR||'Firebase не загрузился (проверьте интернет)');return;}
+  if(u!==ADMIN_LOGIN){$('lerr').textContent='Этот аккаунт не администратор (нужен логин '+ADMIN_LOGIN+')';return;}
+  if(!p){$('lerr').textContent='Введите пароль';return;}
+  $('lerr').textContent='Входим…';
+  auth.signInWithEmailAndPassword(u+'@players.diamond-clicker.app',p).then(function(){$('lerr').textContent='';}).catch(function(e){$('lerr').textContent='❌ '+(AUTH_MSG[e.code]||('Ошибка: '+(e.code||e.message)));});
+}
+function doLogout(){auth.signOut();}
+if(auth)auth.onAuthStateChanged(function(u){
+  unsubs.forEach(function(f){try{f();}catch(e){}});unsubs=[];
+  var ok=u&&u.email&&u.email.split('@')[0]===ADMIN_LOGIN;
+  $('login').classList.toggle('hide',!!ok);$('app').classList.toggle('hide',!ok);
+  if(u&&!ok){auth.signOut();return;}
+  if(!ok)return;
+  $('who').textContent=u.email.split('@')[0];
+  unsubs.push(db.collection('themes').onSnapshot(function(s){
+    themes=[];s.forEach(function(d){var v=d.data();v.id=d.id;themes.push(v);});
+    themes.sort(function(a,b){return (a.order||0)-(b.order||0);});renderList();
+  },function(e){toast('Ошибка чтения тем: '+e.code,true);}));
+  unsubs.push(db.doc('app_config/theme').onSnapshot(function(d){
+    forced=d.exists?{themeId:d.data().themeId||'',enabled:!!d.data().enabled}:{themeId:'',enabled:false};renderList();updForced();
+  }));
+});
+function renderList(){
+  $('list').innerHTML=themes.length?themes.map(function(t){
+    return '<div class="th'+(t.id===curId?' sel':'')+'" onclick="pick(\''+esc(t.id)+'\')"><span class="e">'+esc(t.emoji||'🎨')+'</span><span class="n">'+esc(t.name)+'</span>'
+      +(forced.enabled&&forced.themeId===t.id?'<span class="b g">🌟 всем</span>':'')+(t.price>0?'<span class="b">'+t.price+' ⚡</span>':'')+(t.enabled===false?'<span class="b o">выкл</span>':'')+'</div>';}).join(''):'<p class="hint">Тем пока нет.</p>';
+}
+function updForced(){
+  var t=themes.filter(function(x){return x.id===forced.themeId;})[0];
+  $('forcedInfo').textContent=forced.enabled&&t?'Сейчас у всех игроков включена тема «'+t.name+'».':'Тема для всех не выбрана — игроки используют свои.';
+}
+function blank(){return {name:'Новая тема',emoji:'🎨',enabled:true,order:themes.length+1,price:0,pattern:'dots',font:'default',colors:JSON.parse(JSON.stringify(DC_THEME_DEFAULTS)),customCss:''};}
+function open_(t,id){
+  cur=JSON.parse(JSON.stringify(t));curId=id;
+  $('editorWrap').classList.remove('hide');$('emptyHint').classList.add('hide');$('btnForce').disabled=!id;
+  $('f_name').value=cur.name||'';$('f_emoji').value=cur.emoji||'';$('f_price').value=cur.price||0;$('f_order').value=cur.order||0;
+  $('f_pattern').value=cur.pattern||'dots';$('f_font').value=cur.font||'default';$('f_enabled').checked=cur.enabled!==false;$('f_css').value=cur.customCss||'';
+  cur.colors=Object.assign({},DC_THEME_DEFAULTS,cur.colors||{});
+  $('colors').innerHTML=Object.keys(DC_THEME_DEFAULTS).map(function(k){return '<label class="col"><input type="color" id="c_'+k+'" value="'+cur.colors[k]+'"><span>'+COLOR_LABELS[k]+'</span></label>';}).join('');
+  Object.keys(DC_THEME_DEFAULTS).forEach(function(k){$('c_'+k).addEventListener('input',function(){cur.colors[k]=this.value;preview();});});
+  renderList();preview();
+}
+function pick(id){var t=themes.filter(function(x){return x.id===id;})[0];if(t)open_(t,id);}
+function newTheme(){open_(blank(),null);}
+function readForm(){
+  cur.name=$('f_name').value.trim();cur.emoji=$('f_emoji').value.trim()||'🎨';cur.price=Math.max(0,+$('f_price').value||0);cur.order=+$('f_order').value||0;
+  cur.pattern=$('f_pattern').value;cur.font=$('f_font').value;cur.enabled=$('f_enabled').checked;cur.customCss=$('f_css').value;
+}
+['f_name','f_emoji','f_price','f_order','f_pattern','f_font','f_enabled','f_css'].forEach(function(i){document.addEventListener('input',function(e){if(e.target.id===i&&cur){readForm();preview();}});document.addEventListener('change',function(e){if(e.target.id===i&&cur){readForm();preview();}});});
+function preview(){if(cur)$('pvStyle').textContent=dcBuildThemeCss(cur,'#pv');}
+function mix(hex,to,f){var a=parseInt(hex.slice(1),16),b=parseInt(to.slice(1),16),r=function(s){return Math.round(((a>>s)&255)*(1-f)+((b>>s)&255)*f);};return '#'+((1<<24)+(r(16)<<16)+(r(8)<<8)+r(0)).toString(16).slice(1);}
+function autoShades(){
+  if(!cur)return;
+  [['primary','primaryD','primaryS'],['second','secondD','secondS'],['accent','accentD','accentS']].forEach(function(g){
+    cur.colors[g[1]]=mix(cur.colors[g[0]],'#000000',.32);cur.colors[g[2]]=mix(cur.colors[g[0]],'#000000',.66);
+    $('c_'+g[1]).value=cur.colors[g[1]];$('c_'+g[2]).value=cur.colors[g[2]];});
+  preview();toast('Оттенки подобраны');
+}
+function saveTheme(){
+  if(!cur)return;readForm();
+  if(!cur.name){toast('Введите название',true);return;}
+  var id=curId||('t_'+Date.now().toString(36));
+  var data={name:cur.name,emoji:cur.emoji,enabled:cur.enabled,order:cur.order,price:cur.price,pattern:cur.pattern,font:cur.font,colors:cur.colors,customCss:cur.customCss,updatedAt:TS()};
+  if(!curId)data.createdAt=TS();
+  db.collection('themes').doc(id).set(data,{merge:true}).then(function(){curId=id;$('btnForce').disabled=false;toast('Сохранено — игроки увидят сразу');})
+    .catch(function(e){toast('Не сохранилось: '+(e.code||e.message),true);});
+}
+function dupTheme(){if(!cur)return;readForm();var c=JSON.parse(JSON.stringify(cur));c.name=c.name+' (копия)';c.order=themes.length+1;open_(c,null);toast('Копия создана — нажмите «Сохранить»');}
+function delTheme(){
+  if(!curId){cur=null;$('editorWrap').classList.add('hide');$('emptyHint').classList.remove('hide');return;}
+  if(!confirm('Удалить тему «'+cur.name+'»? У игроков она пропадёт.'))return;
+  var id=curId;
+  db.collection('themes').doc(id).delete().then(function(){
+    if(forced.themeId===id)return db.doc('app_config/theme').set({themeId:'',enabled:false,updatedAt:TS()});
+  }).then(function(){curId=null;cur=null;$('editorWrap').classList.add('hide');$('emptyHint').classList.remove('hide');toast('Тема удалена');})
+  .catch(function(e){toast('Ошибка: '+(e.code||e.message),true);});
+}
+function forceTheme(on){
+  var p=on?(curId?db.doc('app_config/theme').set({themeId:curId,enabled:true,updatedAt:TS()}):Promise.reject({message:'Сначала сохраните тему'}))
+           :db.doc('app_config/theme').set({themeId:'',enabled:false,updatedAt:TS()});
+  p.then(function(){toast(on?'🌟 Тема включена у всех игроков':'Принудительная тема снята');}).catch(function(e){toast('Ошибка: '+(e.code||e.message),true);});
+}
+
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&!$('login').classList.contains('hide'))doLogin();});
+window.addEventListener('load',function(){if(INIT_ERR)$('lerr').textContent='⚠️ '+INIT_ERR;});
+
+</script></body></html>
